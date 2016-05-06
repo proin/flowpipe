@@ -107,15 +107,17 @@ exports = module.exports = (function () {
         var status = [];
         var err = [];
 
-        for (var i = 0; i < args[0].length; i++) {
-            const parallel_obj = i;
-            var parallel_fn = function () {
+        var parallel_fn = function (parallel_obj) {
+            return function () {
                 err[parallel_obj] = arguments[0];
                 result[parallel_obj] = arguments[1];
                 status[parallel_obj] = true;
                 manage();
-            };
-            work(parallel_fn, args[0][parallel_obj]);
+            }
+        };
+
+        for (var i = 0; i < args[0].length; i++) {
+            work(parallel_fn(i), args[0][i]);
         }
     };
 
