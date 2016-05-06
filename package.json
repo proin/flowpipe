@@ -1,0 +1,23 @@
+{
+  "name": "flowpipe",
+  "version": "0.0.1",
+  "description": "pipeline async utilities for javascript",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/proin/pipeflow.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "async",
+    "flowpipe",
+    "pipe",
+    "pipe",
+    "loop",
+    "loopback"
+  ],
+  "author": "Yeonghun Chae <proin@proinlab.com> (http://proinlab.com)",
+  "license": "ISC"
+}
