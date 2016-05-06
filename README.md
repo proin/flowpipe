@@ -5,7 +5,7 @@
 ## Quick Start
 
 ```javascript
-var flowpipe = require('pipeflow');
+var flowpipe = require('flowpipe');
 
 flowpipe.init(function (next) {
     // init before start
