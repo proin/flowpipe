@@ -1,13 +1,13 @@
-`pipeflow` is installable via:
+`flowpipe` is installable via:
 
-- npm: `npm install pipeflow`
+- npm: `npm install flowpipe`
 
 ## Quick Start
 
 ```javascript
-var pipeflow = require('pipeflow');
+var flowpipe = require('pipeflow');
 
-pipeflow.init(function (next) {
+flowpipe.init(function (next) {
     // init before start
     var page = 1;
     next(null, page);
