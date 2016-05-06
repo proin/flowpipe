@@ -4,7 +4,7 @@
 
 ## Quick Start
 
-```
+```javascript
 var pipeflow = require('pipeflow');
 
 pipeflow.init(function (next) {
