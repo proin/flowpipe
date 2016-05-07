@@ -56,9 +56,15 @@ exports = module.exports = (function () {
         return obj;
     };
 
-    obj.loopback = function (type, name, work) {
-        next_id.push('loopback-' + type + '-' + name);
-        flow['loopback-' + type + '-' + name] = work;
+    obj.loopback = function (name, work) {
+        next_id.push('loopback-' + name);
+        flow['loopback-' + name] = work;
+        return obj;
+    };
+
+    obj.jump = function (name, work) {
+        next_id.push('jump-' + name);
+        flow['jump-' + name] = work;
         return obj;
     };
 
@@ -162,6 +168,27 @@ exports = module.exports = (function () {
         };
 
         var exec = 'work(loop,next_fn,loopback_instance[next]';
+        for (var i = 0; i < args.length; i++)
+            exec += ',args[' + i + ']'
+        exec += ')';
+        eval(exec);
+    };
+
+    action.jump = function (next, args) {
+        var work = flow[next];
+
+        var jump = function () {
+            var jump_to = arguments[0];
+            arguments[0] = null;
+
+            for (var i = 0; i < next_id.length; i++)
+                if (next_id[i] == jump_to)
+                    proc = i;
+
+            manager(arguments);
+        };
+
+        var exec = 'work(jump';
         for (var i = 0; i < args.length; i++)
             exec += ',args[' + i + ']'
         exec += ')';
