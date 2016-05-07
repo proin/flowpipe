@@ -129,11 +129,10 @@ exports = module.exports = (function () {
             }
         };
 
-        if (!args[0][i] || args[0][i].length == 0) {
+        if (!args[0] || args[0].length == 0) {
             args.unshift(null);
             return manager(args);
         }
-
 
         try {
             for (var i = 0; i < args[0].length; i++) {
