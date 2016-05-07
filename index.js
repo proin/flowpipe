@@ -5,6 +5,7 @@ exports = module.exports = (function () {
     var next_id = [];
     var proc = 0;
     var loopback_instance = {};
+    var opts = {};
 
     var manager = function (args) {
         if (args[0]) {
@@ -32,8 +33,14 @@ exports = module.exports = (function () {
         action[type](next, args_pipe);
     };
 
-    obj.init = function (work) {
-        action.init = work;
+    obj.init = function (_opts, work) {
+        if (work) {
+            action.init = work;
+            opts = _opts;
+        } else {
+            action.init = _opts;
+        }
+
         return obj;
     };
 
@@ -117,7 +124,11 @@ exports = module.exports = (function () {
         };
 
         for (var i = 0; i < args[0].length; i++) {
-            work(parallel_fn(i), args[0][i]);
+            var exec = 'work(parallel_fn(' + i + '),args[0][i]';
+            for (var j = 1; j < args.length; j++)
+                exec += ',args[' + j + ']'
+            exec += ')';
+            eval(exec);
         }
     };
 
