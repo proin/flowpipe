@@ -100,12 +100,22 @@ exports = module.exports = (function () {
                     if (!status[i])
                         return;
 
-                for (var i = 0; i < result.length; i++)
-                    if (result[i][0])
-                        return action.end(result[i][0]);
+                for (var i = 0; i < err.length; i++)
+                    if (err[i])
+                        return action.end(err[i]);
 
-                args[0] = result;
-                args.unshift(null);
+                var hasResult = false;
+                for (var i = 0; i < result.length; i++)
+                    if (result[i])
+                        hasResult = true;
+
+                console.log(hasResult);
+                if (hasResult) {
+                    args[0] = result;
+                    args.unshift(null);
+                } else {
+                    args[0] = null;
+                }
                 manager(args);
             }
         };
@@ -123,12 +133,15 @@ exports = module.exports = (function () {
             }
         };
 
-        for (var i = 0; i < args[0].length; i++) {
-            var exec = 'work(parallel_fn(' + i + '),args[0][i]';
-            for (var j = 1; j < args.length; j++)
-                exec += ',args[' + j + ']'
-            exec += ')';
-            eval(exec);
+        try {
+            for (var i = 0; i < args[0].length; i++) {
+                var exec = 'work(parallel_fn(' + i + '),args[0][i]';
+                for (var j = 1; j < args.length; j++)
+                    exec += ',args[' + j + ']'
+                exec += ')';
+                eval(exec);
+            }
+        } catch (e) {
         }
     };
 
