@@ -110,17 +110,8 @@ exports = module.exports = (function () {
                     if (err[i])
                         return action.end(err[i]);
 
-                var hasResult = false;
-                for (var i = 0; i < result.length; i++)
-                    if (result[i])
-                        hasResult = true;
-
-                if (hasResult) {
-                    args[0] = result;
-                    args.unshift(null);
-                } else {
-                    args[0] = null;
-                }
+                args[0] = result;
+                args.unshift(null);
                 manager(args);
             }
         };
@@ -137,6 +128,12 @@ exports = module.exports = (function () {
                 manage();
             }
         };
+
+        if (!args[0][i] || args[0][i].length == 0) {
+            args.unshift(null);
+            return manager(args);
+        }
+
 
         try {
             for (var i = 0; i < args[0].length; i++) {
