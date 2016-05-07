@@ -109,7 +109,6 @@ exports = module.exports = (function () {
                     if (result[i])
                         hasResult = true;
 
-                console.log(hasResult);
                 if (hasResult) {
                     args[0] = result;
                     args.unshift(null);
