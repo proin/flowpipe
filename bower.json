@@ -1,6 +1,7 @@
 {
   "name": "flowpipe",
   "description": "pipeline async utilities for javascript",
+  "version":"0.3.6",
   "main": "dist/flowpipe.js",
   "authors": [
     "Yeonghun Chae <proin@proinlab.com> (http://proinlab.com)"
