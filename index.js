@@ -132,14 +132,14 @@ exports = module.exports = (function () {
                     from: current,
                     to: name,
                     arrows: arrows,
-                    label: jumpParam.replace('next, ', '')
+                    label: jumpParam
                 });
 
                 edges.push({
                     from: pre.id,
                     to: current,
                     arrows: arrows,
-                    label: currentParam.replace('loop, next, instance, ', '')
+                    label: currentParam
                 });
             } else if (type == 'parallel') {
                 if (pre.id.split('-')[0] == 'parallel') {
@@ -157,7 +157,7 @@ exports = module.exports = (function () {
                         from: from,
                         to: j + '-' + current,
                         arrows: arrows,
-                        label: currentParam.replace('next, ', '')
+                        label: currentParam
                     });
                     edges.push({from: j + '-' + current, to: current, arrows: arrows});
                     nodeidx++;
@@ -169,7 +169,7 @@ exports = module.exports = (function () {
                     from: pre.id,
                     to: current,
                     arrows: arrows,
-                    label: currentParam.replace('next, ', '')
+                    label: currentParam
                 });
             }
         }
@@ -178,7 +178,7 @@ exports = module.exports = (function () {
             from: next_id[next_id.length - 1],
             to: 'end',
             arrows: arrows,
-            label: flowParams['end'].replace('next, ', '')
+            label: flowParams['end']
         });
 
         if (save_path) {
