@@ -1,5 +1,7 @@
 exports = module.exports = (function () {
-    function getParamNames(func) {
+    function getParamNames(func, sidx) {
+        if (!sidx) sidx = 1;
+
         try {
             var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
             var ARGUMENT_NAMES = /([^\s,]+)/g;
@@ -8,7 +10,7 @@ exports = module.exports = (function () {
 
             var returnVal = '';
             if (result != null)
-                for (var i = 0; i < result.length; i++)
+                for (var i = sidx; i < result.length; i++)
                     returnVal += result[i] + ', '
             returnVal = returnVal.substring(0, returnVal.length - 2);
             return returnVal;
@@ -82,7 +84,7 @@ exports = module.exports = (function () {
     obj.loopback = function (name, work) {
         next_id.push('loopback-' + name);
         flow['loopback-' + name] = work;
-        flowParams['loopback-' + name] = getParamNames(work);
+        flowParams['loopback-' + name] = getParamNames(work, 3);
         return obj;
     };
 
@@ -127,12 +129,12 @@ exports = module.exports = (function () {
             if (type == 'loopback') {
                 nodes.push(nodeCreate(current, 'loopback', typeColor[type]));
                 var jumpParam = flowParams[name];
-
                 edges.push({
                     from: current,
                     to: name,
                     arrows: arrows,
-                    label: jumpParam
+                    label: jumpParam,
+                    color: '#039be5'
                 });
 
                 edges.push({
