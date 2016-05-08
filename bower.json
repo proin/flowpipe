@@ -1,0 +1,25 @@
+{
+  "name": "flowpipe",
+  "description": "pipeline async utilities for javascript",
+  "main": "dist/flowpipe.js",
+  "authors": [
+    "Yeonghun Chae <proin@proinlab.com> (http://proinlab.com)"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "async",
+    "flowpipe",
+    "pipe",
+    "pipe",
+    "loop",
+    "loopback"
+  ],
+  "homepage": "https://github.com/proin/pipeflow",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+    <title>Flowpipe: Graph</title>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+    <script src="../dist/flowpipe.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        var graph = flowpipe
+                .init(function (next) {
+                    // init before start
+                    var page = 1;
+                    next(null, page);
+                })
+                .pipe('start', function (next, page) {
+                    // page is that previous next function's variable
+                    setTimeout(function (err) {
+                        // next is function that proceed next pipe, parallel or loopback
+                        next(err, page);
+                    }, 1000);
+                })
+                .pipe('list', function (next, page) {
+                    console.log('start page: ' + page);
+                    // preparing list for parallel
+                    var list = [{no: 1}, {no: 2}, {no: 3}];
+                    for (var i = 0; i < list.length; i++) {
+                        list[i].page = page;
+                        list[i].delay = 3 - i; // delay time in parallel process
+                    }
+                    // next before parallel, pass only second parameter to parallel process.
+                    // second parameter must be array.
+                    // other parameters pass to next pipe or loopback.
+                    next(null, list, page);
+                })
+                .parallel('parallel process', function (next, data) {
+                    // data is indicating each of list items.
+                    setTimeout(function () {
+                        data.title = 'title-' + data.no;
+                        next(null, data);
+                    }, data.delay * 1000);
+                })
+                .parallel('parallel process 2', function (next, data) {
+                    // data is indicating each of list items.
+                    setTimeout(function () {
+                        data.title = 'title-' + data.no;
+                        next(null, data);
+                    }, data.delay * 1000);
+                })
+                .pipe('pass-1', function (next, parallel, page) {
+                    console.log('pass-1');
+                    next(null, parallel, page);
+                })
+                .pipe('pass-else', function (next, parallel, page) {
+                    console.log('pass-else');
+                    next(null, parallel, page);
+                })
+                .loopback('pipe-list', function (loop, next, instance, parallel, page) {
+                    // loopback(process_type-process_name, fn)
+                    // - process_type: pipe, parallel
+                    // - process_name: must defined
+                    // - fn(loop, next, instance, others...)
+                    //   - loop(err, variables...): passing variable to target process
+                    //   - next(err, variables...): proceeding if loop ended
+                    //   - instance: maintainable variable in loop, object type {}
+                    //   - others: passed from before process
+                    if (!instance.data) instance.data = [];
+                    for (var i = 0; i < parallel.length; i++)
+                        instance.data.push(parallel[i]);
+                    if (page < 5) loop(null, page + 1);
+                    else next(null, instance.data);
+                })
+                .pipe('finalize', function (next, data) {
+                    next(null, data);
+                })
+                .end(function (err, test) {
+                    // end(callback) or end()
+                    // this must be declared, if not all function don't working.
+                    // proceed in the end or occured error in process
+                })
+                .graph();
+    </script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet"
+          type="text/css"/>
+
+    <style type="text/css">
+        html, body, .row {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .col-md-12 {
+            height: 100%;
+        }
+
+        #mynetwork {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="row">
+    <div class="col-md-12">
+        <div id="mynetwork"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    try {
+        var val = graph;
+        var nodes = new vis.DataSet(val.nodes);
+        var edges = new vis.DataSet(val.edges);
+        var container = document.getElementById('mynetwork');
+        var data = {nodes: nodes, edges: edges};
+        var options = {};
+        var network = new vis.Network(container, data, options);
+    } catch (e) {
+        alert('parse error');
+    }
+</script>
+</body>
+</html>
