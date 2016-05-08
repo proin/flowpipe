@@ -118,4 +118,4 @@ var graph = flowpipe
 - flowpipe.graph(savePath)
     - save graph
     - must be proceed after end
-    - ![Image of Graph](http://proinlab.com/wp-content/uploads/2016/05/스크린샷-2016-05-08-오후-7.34.03.png)
+    - ![Image of Graph](resources/graph-image.png)
