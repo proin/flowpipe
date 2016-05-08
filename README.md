@@ -4,6 +4,8 @@
 
 ## Quick Start
 
+![Image of Graph](resources/graph-image.png)
+
 ```javascript
 var flowpipe = require('flowpipe');
 
@@ -118,4 +120,3 @@ var graph = flowpipe
 - flowpipe.graph(savePath)
     - save graph
     - must be proceed after end
-    - ![Image of Graph](resources/graph-image.png)
