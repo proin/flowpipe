@@ -1,16 +1,20 @@
 exports = module.exports = (function () {
     function getParamNames(func) {
-        var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
-        var ARGUMENT_NAMES = /([^\s,]+)/g;
-        var fnStr = func.toString().replace(STRIP_COMMENTS, '');
-        var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+        try {
+            var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+            var ARGUMENT_NAMES = /([^\s,]+)/g;
+            var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+            var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
 
-        var returnVal = '';
-        if (result != null)
-            for (var i = 0; i < result.length; i++)
-                returnVal += result[i] + ', '
-        returnVal = returnVal.substring(0, returnVal.length - 2);
-        return returnVal;
+            var returnVal = '';
+            if (result != null)
+                for (var i = 0; i < result.length; i++)
+                    returnVal += result[i] + ', '
+            returnVal = returnVal.substring(0, returnVal.length - 2);
+            return returnVal;
+        } catch (e) {
+            return '';
+        }
     }
 
     var obj = {};
