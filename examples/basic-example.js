@@ -1,11 +1,4 @@
-`flowpipe` is installable via:
-
-- npm: `npm install flowpipe`
-
-## Quick Start
-
-```javascript
-var flowpipe = require('flowpipe');
+var flowpipe = require('../index');
 
 var graph = flowpipe
     .init(function (next) {
@@ -79,43 +72,3 @@ var graph = flowpipe
         // proceed in the end or occured error in process
     })
     .graph('./basic-example-graph.html');
-```
-
-## Documents
-
-- flowpipe.init(work)
-    - initialize variables
-    - params
-        - `work`: function(next)
-            - `next`: function(err, arg1, arg2 ...)
-                - callback for next work. must be execute this function in callback.
-- flowpipe.pipe(name, work)
-    - params
-        - `name`: current work's name
-        - `work`: function(next, arg1, arg2 ...)
-            - `next`: function(err, arg1, arg2 ...)
-            - `args`: previous work's results
-- flowpipe.parallel(name, work)
-    - processing work in parallel.
-    - params
-        - `name`: current work's name
-        - `work`: function(next, list_item, args ...)
-            - `next`: function(err, item)
-                - `item`: sync items to list
-            - `list_item`: parameter in previous work's first variable. must be array in previous.
-            - `args`: previous work's results, not array
-- flowpipe.loopback(target, work)
-    - params
-        - `target`: jump to, `function`-`name`
-        - `work`: function(loop, next, instance, args ...)
-            - `loop`: function(err, args ...), when loop continue
-            - `next`: function(err, args ...), when loop end
-            - `instance`: maintenance variable in loop
-- flowpipe.end(work)
-    - this function must be added in last.
-    - params
-        - work: function(err, args ...)
-- flowpipe.graph(savePath)
-    - save graph
-    - must be proceed after end
-    - ![Image of Graph](http://proinlab.com/wp-content/uploads/2016/05/스크린샷-2016-05-08-오후-7.34.03.png)

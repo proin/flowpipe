@@ -1,6 +1,21 @@
 exports = module.exports = (function () {
+    function getParamNames(func) {
+        var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+        var ARGUMENT_NAMES = /([^\s,]+)/g;
+        var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+        var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+
+        var returnVal = '';
+        if (result != null)
+            for (var i = 0; i < result.length; i++)
+                returnVal += result[i] + ', '
+        returnVal = returnVal.substring(0, returnVal.length - 2);
+        return returnVal;
+    }
+
     var obj = {};
     var flow = {};
+    var flowParams = {};
     var action = {};
     var next_id = [];
     var proc = 0;
@@ -35,10 +50,12 @@ exports = module.exports = (function () {
 
     obj.init = function (_opts, work) {
         if (work) {
+            flowParams['init'] = getParamNames(work);
             action.init = work;
             opts = _opts;
         } else {
             action.init = _opts;
+            flowParams['init'] = getParamNames(_opts);
         }
 
         return obj;
@@ -47,33 +64,127 @@ exports = module.exports = (function () {
     obj.pipe = function (name, work) {
         next_id.push('pipe-' + name);
         flow['pipe-' + name] = work;
+        flowParams['pipe-' + name] = getParamNames(work);
         return obj;
     };
 
     obj.parallel = function (name, work) {
         next_id.push('parallel-' + name);
         flow['parallel-' + name] = work;
+        flowParams['parallel-' + name] = getParamNames(work);
         return obj;
     };
 
     obj.loopback = function (name, work) {
         next_id.push('loopback-' + name);
         flow['loopback-' + name] = work;
+        flowParams['loopback-' + name] = getParamNames(work);
         return obj;
     };
 
     obj.jump = function (name, work) {
         next_id.push('jump-' + name);
         flow['jump-' + name] = work;
+        flowParams['jump-' + name] = getParamNames(work);
         return obj;
     };
 
     obj.end = function (work) {
         action.end = work ? work : function () {
         };
+        flowParams['end'] = getParamNames(work);
         action.init(function () {
             manager(arguments);
         });
+        return obj;
+    };
+
+    obj.graph = function (save_path) {
+        var idx = 0;
+        var nodes = [];
+        var edges = [];
+        var typeColor = {parallel: '#0277bd', pipe: '#039be5', jump: '#00acc1', loopback: '#f57c00'};
+        var arrows = {to: {enabled: true, scaleFactor: 1}};
+
+        var nodeCreate = function (id, label, color) {
+            var lb = label.length > 8 ? label.substring(0, 6) + '...' : label;
+            return {id: id, label: lb, title: label, shape: 'box', font: {color: '#fff'}, color: color}
+        };
+
+        nodes.push(nodeCreate('init', 'init', '#7cb342'));
+        var nodeidx = 0;
+        for (var i = 0; i < next_id.length; i++, nodeidx++) {
+            var current = next_id[i];
+            var type = current.split('-')[0];
+            var name = current.substring(type.length + 1);
+            var pre = nodes[nodeidx];
+            var currentParam = flowParams[current];
+
+            if (type == 'loopback') {
+                nodes.push(nodeCreate(current, 'loopback', typeColor[type]));
+                var jumpParam = flowParams[name];
+
+                edges.push({
+                    from: current,
+                    to: name,
+                    arrows: arrows,
+                    label: jumpParam.replace('next, ', '')
+                });
+
+                edges.push({
+                    from: pre.id,
+                    to: current,
+                    arrows: arrows,
+                    label: currentParam.replace('loop, next, instance, ', '')
+                });
+            } else if (type == 'parallel') {
+                if (pre.id.split('-')[0] == 'parallel') {
+                    pre = nodes.splice(nodeidx, 1)[0];
+                    nodeidx--;
+                }
+
+                for (var j = 0; j < 2; j++) {
+                    var insertnode = nodeCreate(j + '-' + current, name, typeColor[type]);
+                    nodes.push(insertnode);
+                    var from = pre.id;
+                    if (pre.id.split('-')[0] == 'parallel')
+                        from = j + '-' + from;
+                    edges.push({
+                        from: from,
+                        to: j + '-' + current,
+                        arrows: arrows,
+                        label: currentParam.replace('next, ', '')
+                    });
+                    edges.push({from: j + '-' + current, to: current, arrows: arrows});
+                    nodeidx++;
+                }
+                nodes.push(nodeCreate(current, 'Sync', typeColor[type]));
+            } else {
+                nodes.push(nodeCreate(current, name, typeColor[type]));
+                edges.push({
+                    from: pre.id,
+                    to: current,
+                    arrows: arrows,
+                    label: currentParam.replace('next, ', '')
+                });
+            }
+        }
+        nodes.push(nodeCreate('end', 'end', '#f57c00'));
+        edges.push({
+            from: next_id[next_id.length - 1],
+            to: 'end',
+            arrows: arrows,
+            label: flowParams['end'].replace('next, ', '')
+        });
+
+        if (save_path) {
+            var fs = require('fs');
+            var html = fs.readFileSync(__dirname + '/resources/graph.html') + '';
+            html = html.replace('flowpipegraphdata', JSON.stringify({nodes: nodes, edges: edges}));
+            fs.writeFileSync(save_path, html);
+        }
+
+        return {nodes: nodes, edges: edges};
     };
 
     action.pipe = function (next, args) {
