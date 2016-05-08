@@ -1,6 +1,7 @@
 `flowpipe` is installable via:
 
-- npm: `npm install flowpipe`
+- npm: `npm install flowpipe --save`
+- bower: `bower install flowpipe --save`
 
 ## Quick Start
 
