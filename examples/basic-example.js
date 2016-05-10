@@ -71,4 +71,4 @@ var graph = flowpipe
         // this must be declared, if not all function don't working.
         // proceed in the end or occured error in process
     })
-    .graph('./basic-example-graph.html');
+    .graph('./graph/basic-example-graph.html');

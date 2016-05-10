@@ -71,7 +71,7 @@ flowpipe1
         // this must be declared, if not all function don't working.
         // proceed in the end or occured error in process
     })
-    .graph('./basic-example-graph-2.html');
+    .graph('./graph/basic-example-graph-2.html');
 
 var flowpipe2 = require('../index');
 
@@ -146,4 +146,4 @@ flowpipe2
         // this must be declared, if not all function don't working.
         // proceed in the end or occured error in process
     })
-    .graph('./basic-example-graph-1.html');
+    .graph('./graph/basic-example-graph-1.html');

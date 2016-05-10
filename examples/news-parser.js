@@ -150,7 +150,7 @@ flowpipe
             next(null);
         }
     })
-    .end().graph('news-parser.html');
+    .end().graph('./graph/news-parser.html');
 
 // Date Format Prototypes
 Date.prototype.day = function (val) {

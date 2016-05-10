@@ -10,7 +10,7 @@
 ```javascript
 var flowpipe = require('flowpipe');
 
-var graph = flowpipe
+flowpipe
     .init(function (next) {
         // init before start
         var page = 1;
@@ -50,6 +50,15 @@ var graph = flowpipe
             next(null, data);
         }, data.delay * 1000);
     })
+    .parallel('multi-thread', function (next, data) {
+        // this option {multiThread: true} makes your function async.
+        // in node.js's single thread, navie logic is processing by single thread.
+        // if you use this, all of logics are processing in multi thread.
+        // ***WARNING: use only local variables or parameters from previous pipe.
+        //           do not use global, or functional objects from previous pipe.
+        for(var i=0;i<100000000;i++) ;
+        next(null, data);
+    }, {multiThread: true})
     .pipe('pass-1', function (next, parallel, page) {
         console.log('pass-1');
         next(null, parallel, page);
@@ -98,7 +107,7 @@ var graph = flowpipe
         - `work`: function(next, arg1, arg2 ...)
             - `next`: function(err, arg1, arg2 ...)
             - `args`: previous work's results
-- flowpipe.parallel(name, work)
+- flowpipe.parallel(name, work, opts)
     - processing work in parallel.
     - params
         - `name`: current work's name
@@ -107,6 +116,8 @@ var graph = flowpipe
                 - `item`: sync items to list
             - `list_item`: parameter in previous work's first variable. must be array in previous.
             - `args`: previous work's results, not array
+        - `opts`:
+            - multiThread: default `false`
 - flowpipe.loopback(target, work)
     - params
         - `target`: jump to, `function`-`name`

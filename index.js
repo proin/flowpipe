@@ -55,16 +55,9 @@ exports = module.exports = (function () {
             action[type](next, args_pipe);
         };
 
-        obj.init = function (_opts, work) {
-            if (work) {
-                flowParams['init'] = getParamNames(work);
-                action.init = work;
-                opts = _opts;
-            } else {
-                action.init = _opts;
-                flowParams['init'] = getParamNames(_opts);
-            }
-
+        obj.init = function (work) {
+            flowParams['init'] = getParamNames(work);
+            action.init = work;
             return obj;
         };
 
@@ -75,10 +68,11 @@ exports = module.exports = (function () {
             return obj;
         };
 
-        obj.parallel = function (name, work) {
+        obj.parallel = function (name, work, _opts) {
             next_id.push('parallel-' + name);
             flow['parallel-' + name] = work;
             flowParams['parallel-' + name] = getParamNames(work);
+            opts['parallel-' + name] = _opts;
             return obj;
         };
 
@@ -209,6 +203,7 @@ exports = module.exports = (function () {
         };
 
         action.parallel = function (next, args) {
+            if (!opts[next]) opts[next] = {};
             var work = flow[next];
 
             if (typeof args[0] != 'object') {
@@ -223,7 +218,6 @@ exports = module.exports = (function () {
                     for (var i = 0; i < status.length; i++)
                         if (!status[i])
                             return;
-
                     for (var i = 0; i < err.length; i++)
                         if (err[i])
                             return action.end(err[i]);
@@ -252,15 +246,78 @@ exports = module.exports = (function () {
                 return manager(args);
             }
 
-            try {
-                for (var i = 0; i < args[0].length; i++) {
-                    var exec = 'work(parallel_fn(' + i + '),args[0][i]';
-                    for (var j = 1; j < args.length; j++)
-                        exec += ',args[' + j + ']'
-                    exec += ')';
-                    eval(exec);
+            var execArray = [];
+            for (var i = 0; i < args[0].length; i++) {
+                var exec = 'work(parallel_fn(' + i + '),args[0][' + i + ']';
+                for (var j = 1; j < args.length; j++)
+                    exec += ',args[' + j + ']'
+                exec += ')';
+                execArray.push(exec);
+            }
+
+            if (opts[next].multiThread) {
+                var full_script = 'var args = ' + JSON.stringify(args) + ';\n\n';
+                var script_parallel_fn = 'var parallel_fn = ' + (function (parallel_obj) {
+                        return function () {
+                            var parallelResult = {};
+                            parallelResult.id = parallel_obj;
+                            parallelResult.err = arguments[0];
+                            parallelResult.result = arguments[1];
+                            parallelResult.status = true;
+                            console.log('FLOWPIPE-PARALLEL-RESULT' + JSON.stringify(parallelResult));
+                        }
+                    }).toString();
+                var script_work = 'var work = ' + work.toString();
+                full_script += script_parallel_fn + '\n\n' + script_work + '\n\n';
+
+                for (var i = 0; i < execArray.length; i++) {
+                    var script_fn = full_script + execArray[i];
+                    script_fn = encodeURI(script_fn);
+
+                    function runScript(script, pid) {
+                        var spawn = require('child_process').spawn;
+                        var bat = spawn('node', [__dirname + '/libs/async-eval.js', script]);
+                        var flowpipe_parallel_result = null;
+                        var multiThreadError = null;
+                        bat.stdout.on('data', function (data) {
+                            data = data + '';
+                            if (data.indexOf('FLOWPIPE-PARALLEL-RESULT') != -1) {
+                                flowpipe_parallel_result = JSON.parse(data.replace('FLOWPIPE-PARALLEL-RESULT', ''));
+                                return;
+                            }
+                            if ((data + '').length > 0)
+                                console.log((data + '').trim());
+                        });
+
+                        bat.stderr.on('data', function (data) {
+                            multiThreadError = data + '';
+                        });
+
+                        bat.on('exit', function () {
+                            try {
+                                err[flowpipe_parallel_result.id] = flowpipe_parallel_result.err;
+                                result[flowpipe_parallel_result.id] = flowpipe_parallel_result.result;
+                                status[flowpipe_parallel_result.id] = flowpipe_parallel_result.status;
+                            } catch (e) {
+                            }
+
+                            if (multiThreadError) {
+                                err[pid] = multiThreadError;
+                                status[pid] = true;
+                                result[pid] = null;
+                            }
+
+                            manage();
+                            return;
+                        });
+                    }
+
+                    runScript(script_fn, i);
                 }
-            } catch (e) {
+            } else {
+                for (var i = 0; i < execArray.length; i++) {
+                    eval(execArray[i]);
+                }
             }
         };
 
