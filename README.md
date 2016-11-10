@@ -1,14 +1,101 @@
 `flowpipe` is installable via:
 
 - npm: `npm install flowpipe --save`
-- bower: `bower install flowpipe --save`
 
-## Quick Start
+## Promise Based Flowpipe: upper v0.5.0
+
+- v0.5.0 is based on `Promise` Object, so not support previous version.
+- for using older version, `let flowpipe = require('flowpipe').older`
+
+### Quick Start
+
+```javascript
+'use strict';
+
+const Flowpipe = require('flowpipe');
+
+let myWork = (args)=> new Promise((resolve)=>{
+    args.data2.push(Math.random());
+    setTimeout(resolve, 5);
+});
+
+let flowpipe = Flowpipe.instance('MyWork');
+flowpipe
+    // set arguments
+    .init((args)=> args.index = 0)
+    .init((args)=> args.data1 = [])
+    .init((args)=> args.data2 = [])
+    .init((args)=> args.data3 = [])
+    // set work, name as work-1
+    .then('work-1', (args)=> new Promise((resolve)=> {
+        args.data1.push(Math.random());
+        setTimeout(resolve, 5);
+    }))
+    // set work, set name as myWork
+    .then(myWork)
+    // set work, set auto created name 
+    .then((args)=> new Promise((resolve)=> {
+        args.data3.push(Math.random());
+        setTimeout(resolve, 5);
+    }))
+    // loop back to work-1 if args.index < 100 and increase args.index 
+    .loop('work-1', (args)=> ++args.index < 100)
+    // print something
+    .log((args)=> `data1 data2 data3 / ${args.data1.length} ${args.data2.length} ${args.data3.length}`)
+    // set parallel max thread
+    .maxThread(30)
+    // set parallel
+    .parallel((args)=> args.data1, (args, data, idx)=> new Promise((resolve)=> {
+        setTimeout(()=> {
+            resolve();
+        }, data * 1000);
+    }))
+    // print timestamp
+    .timestamp((total, premodule)=> `total: ${total}ms, parallel ${premodule}ms`)
+    // run
+    .run();
+```
+  
+### Document
+
+- Flowpipe.instance(name)
+    - `return` Flowpipe instance
+    - such as `let myjob = require('flowpipe').instance('myJob')`
+- instance.init(setterFn)
+    - set instance's local variables
+    - `setterFn(args)`: must sync function, not async.
+        - such as `instance.init((args)=> args.data = [])`
+- instance.log(printFn)
+    - print log
+    - `printFn(args)`: must have return string
+- instance.timestamp(printFn)
+    - print timestamp
+    - `printFn(total, preModule)`: must have return string
+- instance.then(name, work)
+    - add some work
+    - also, `then, add, pipe`
+    - `name(optional)`: work name for loop back 
+    - `work`: work function, 
+- instance.loop(workname, condition)
+    - also, `loop, for, loopback`
+    - `workname`: target to loopback 
+    - `condition`: must have return boolean
+- instance.maxThread(number)
+    - set parallel max thread
+- instance.parallel(which, work)
+    - `which`: must have return array
+    - `work`: work function (args, data, idx)
+
+---
+
+## Older Flowpipe: v0.4.0
+
+### Quick Start: v0.4.0
 
 ![Image of Graph](resources/graph-image.png)
 
 ```javascript
-var flowpipe = require('flowpipe');
+var flowpipe = require('flowpipe').older;
 
 flowpipe
     .init(function (next) {
@@ -93,7 +180,7 @@ flowpipe
     .graph('./basic-example-graph.html');
 ```
 
-## Documents
+### Documents: v0.4.0
 
 - flowpipe.init(work)
     - initialize variables

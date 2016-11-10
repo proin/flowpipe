@@ -1,6 +1,6 @@
 {
   "name": "flowpipe",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "pipeline async utilities for javascript",
   "main": "index.js",
   "repository": {
