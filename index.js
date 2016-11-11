@@ -86,7 +86,10 @@ module.exports = (()=> {
                     pretime = new Date().getTime();
 
                 if (indicate.type === 'work') {
-                    works[indicate.name](args).then(()=> {
+                    works[indicate.name](args).then((result)=> {
+                        if (typeof result === 'object')
+                            for (let key in result)
+                                args[key] = result[key];
                         manager(wi + 1);
                     }).catch((e)=> {
                         console.log(`[${instanceName}] ERROR IN "${indicate.name}"`);
